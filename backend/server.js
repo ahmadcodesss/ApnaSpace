@@ -1,84 +1,53 @@
-const express = require("express");
 const http = require("http");
-const cors = require("cors");
 const { Server } = require("socket.io");
 
-const app = express();
-app.use(cors());
+const server = http.createServer();
 
-const server = http.createServer(app);
-
-// Socket server
 const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:5173", 
-    methods: ["GET", "POST"]
-  }
+  cors: { origin: "*" }
 });
 
-// Test route
-app.get("/", (req, res) => {
-  res.send("ApnaSpace Backend Running ");
-});
+let users = {};
+let rooms = new Set();
+let roomUsers = {};
 
-// ROOM STORAGE (in-memory)
-const rooms = {};
-
-// Socket connection
 io.on("connection", (socket) => {
-  console.log(" User connected:", socket.id);
+  console.log("CONNECTED:", socket.id);
 
-  socket.emit("welcome", " Welcome to ApnaSpace!");
+  socket.on("set_username", (name) => {
+    users[socket.id] = name;
+    socket.emit("room_list", Array.from(rooms));
+  });
+
+  socket.on("get_rooms", () => {
+    socket.emit("room_list", Array.from(rooms));
+  });
+
+  socket.on("create_room", (room) => {
+    if (!room) return;
+    rooms.add(room);
+    roomUsers[room] = [];
+    io.emit("room_list", Array.from(rooms));
+  });
+
+  socket.on("join_room", (room) => {
+    socket.join(room);
+    if (!roomUsers[room]) roomUsers[room] = [];
+    roomUsers[room].push(users[socket.id]);
+    io.to(room).emit("users_update", roomUsers[room]);
+    io.to(room).emit("system_message", `${users[socket.id]} joined ${room}`);
+  });
+
+  socket.on("send_message", ({ room, message }) => {
+    io.to(room).emit("receive_message", {
+      user: users[socket.id],
+      message
+    });
+  });
 
   socket.on("disconnect", () => {
-    console.log(" User disconnected:", socket.id);
-  });
-
-
-  // JOIN ROOM
-  socket.on("join_room", (roomId, username) => {
-    socket.join(roomId);
-
-    if (!rooms[roomId]) {
-      rooms[roomId] = { users: [] };
-    }
-
-    rooms[roomId].users.push({ id: socket.id, username });
-
-    io.to(roomId).emit("room_users", rooms[roomId].users);
-  });
-
-  // CHAT MESSAGE
-  socket.on("send_message", (data) => {
-    // data = { roomId, message, username }
-    io.to(data.roomId).emit("receive_message", data);
-  });
-
-  // WHITEBOARD DRAWING
-  socket.on("draw", (data) => {
-    // data = { roomId, x, y, type, username }
-    socket.to(data.roomId).emit("draw", data);
-  });
-
-  // DISCONNECT
-  socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
-
-    // remove user from rooms
-    for (let roomId in rooms) {
-      rooms[roomId].users = rooms[roomId].users.filter(
-        (u) => u.id !== socket.id
-      );
-
-      // delete room if empty
-      if (rooms[roomId].users.length === 0) {
-        delete rooms[roomId];
-      }
-    }
+    delete users[socket.id];
   });
 });
 
-// START SERVER
-server.listen(3000, () => {
-  console.log("Backend running on http://localhost:3000");
-});
+server.listen(3000, () => console.log("ApnaSpace running on port 3000"));

@@ -1,33 +1,20 @@
 import { useState } from "react";
-import UsernameScreen from "./components/UsernameScreen";
-import Lobby from "./components/Lobby";
+import UsernameScreen from "./components/UsernameScreen.jsx";
+import Lobby from "./components/Lobby.jsx";
+import Room from "./components/Room.jsx";
+import { socket } from "./socket.js";
 
-function App() {
+export default function App() {
   const [username, setUsername] = useState("");
   const [room, setRoom] = useState("");
 
-  // STEP 1: Username screen
-  if (!username) {
-    return <UsernameScreen onJoin={(name) => setUsername(name)} />;
-  }
+  const handleLogin = (name) => {
+    if (!name.trim()) return;
+    setUsername(name);
+    socket.emit("set_username", name);
+  };
 
-  // STEP 2: Lobby screen
-  if (!room) {
-    return (
-      <Lobby
-        username={username}
-        onJoinRoom={(roomName) => setRoom(roomName)}
-      />
-    );
-  }
-
-  // STEP 3: TEMP ROOM SCREEN
-  return (
-    <div style={{ textAlign: "center", marginTop: "50px" }}>
-      <h1> Room: {room}</h1>
-      <p>Next step: Chat + Whiteboard </p>
-    </div>
-  );
+  if (!username) return <UsernameScreen onLogin={handleLogin} />;
+  if (!room) return <Lobby setRoom={setRoom} />;
+  return <Room room={room} username={username} />;
 }
-
-export default App;

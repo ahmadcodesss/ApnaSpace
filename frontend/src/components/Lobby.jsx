@@ -1,87 +1,49 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { socket } from "../socket";
 
-export default function Lobby({ username, onJoinRoom }) {
-  const [rooms, setRooms] = useState(["Room A", "Room B"]);
+export default function Lobby({ setRoom }) {
+  const [rooms, setRooms] = useState([]);
   const [newRoom, setNewRoom] = useState("");
 
+  useEffect(() => {
+    const handleRooms = (data) => {
+      setRooms(data);
+    };
+
+    socket.on("room_list", handleRooms);
+    socket.emit("get_rooms");
+
+    return () => socket.off("room_list", handleRooms);
+  }, []);
+
   const createRoom = () => {
-    if (newRoom.trim() === "") return;
-    setRooms([...rooms, newRoom]);
+    if (!newRoom.trim()) return;
+    socket.emit("create_room", newRoom.trim());
     setNewRoom("");
   };
 
   return (
-    <div style={styles.container}>
-      
-      <h1>🚀 ApnaSpace</h1>
-      <h3>👋 Hi, {username}</h3>
-
-      {/* CREATE ROOM */}
-      <div style={styles.createBox}>
-        <input
-          placeholder="Create room..."
-          value={newRoom}
-          onChange={(e) => setNewRoom(e.target.value)}
-          style={styles.input}
-        />
-        <button onClick={createRoom} style={styles.button}>
-          ➕ Create
-        </button>
-      </div>
-
-      {/* ACTIVE ROOMS */}
+    <div style={{ padding: 20 }}>
       <h2>🏠 Active Rooms</h2>
 
-      <div style={styles.roomList}>
-        {rooms.map((room, index) => (
-          <div key={index} style={styles.roomCard}>
-            <span>📌 {room}</span>
-            <button
-              style={styles.joinBtn}
-              onClick={() => onJoinRoom(room)}
-            >
-              Join 🚀
-            </button>
-          </div>
-        ))}
-      </div>
+      {rooms.length === 0 && <p>No rooms yet. Create one!</p>}
 
+      {rooms.map((r, i) => (
+        <div key={i} style={{ marginBottom: 8 }}>
+          <span>{r}</span>
+          <button onClick={() => setRoom(r)} style={{ marginLeft: 10 }}>Join</button>
+        </div>
+      ))}
+
+      <hr />
+      <h3>Create Room</h3>
+      <input
+        value={newRoom}
+        onChange={(e) => setNewRoom(e.target.value)}
+        onKeyDown={(e) => e.key === "Enter" && createRoom()}
+        placeholder="Room name..."
+      />
+      <button onClick={createRoom} style={{ marginLeft: 8 }}>Create</button>
     </div>
   );
 }
-
-const styles = {
-  container: {
-    padding: "20px",
-    textAlign: "center",
-  },
-  createBox: {
-    margin: "20px 0",
-  },
-  input: {
-    padding: "8px",
-    marginRight: "10px",
-  },
-  button: {
-    padding: "8px 12px",
-  },
-  roomList: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "10px",
-    marginTop: "20px",
-    alignItems: "center",
-  },
-  roomCard: {
-    width: "250px",
-    display: "flex",
-    justifyContent: "space-between",
-    padding: "10px",
-    border: "1px solid #ccc",
-    borderRadius: "8px",
-  },
-  joinBtn: {
-    padding: "5px 10px",
-    cursor: "pointer",
-  },
-};
