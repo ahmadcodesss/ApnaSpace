@@ -2,7 +2,7 @@
 import { useEffect, useState, useRef } from "react";
 import { socket } from "../socket";
 
-export default function Room({ room, username, setRoom }) {
+export default function Room({ room, username, setRoom, setView}) {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
   const bottomRef = useRef(null);
@@ -50,6 +50,23 @@ export default function Room({ room, username, setRoom }) {
             fontSize: 13, cursor: "pointer"
           }}
         >← Back</button>
+
+
+            {/* ADD THIS */}
+  <button
+    onClick={() => setView("whiteboard")}
+    style={{
+      background: "transparent", border: "0.5px solid #2a2a30",
+      borderRadius: 6, padding: "5px 10px", color: "#888",
+      fontSize: 13, cursor: "pointer"
+    }}
+  >🖼️ Whiteboard</button>
+
+
+
+
+
+
         <span style={{ color: "#555", fontSize: 20 }}>#</span>
         <span style={{ color: "#f0f0f0", fontSize: 16, fontWeight: 500 }}>{room}</span>
       </div>

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { socket } from "../socket";
 
-export default function Whiteboard({ room, username, setRoom }) {
+export default function Whiteboard({ room, username, setRoom , setView}) {
   const canvasRef = useRef(null);
   const isDrawing = useRef(false);
   const lastPos = useRef(null);
@@ -115,7 +115,7 @@ export default function Whiteboard({ room, username, setRoom }) {
         padding: "12px 24px", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap"
       }}>
         <button
-          onClick={() => setRoom("")}
+          onClick={() => setView("chat")}
           style={{
             background: "transparent", border: "0.5px solid #2a2a30",
             borderRadius: 6, padding: "6px 12px", color: "#888",
