@@ -1,16 +1,21 @@
-
-
-
-
 const http = require("http");
+const express = require("express");
+const app = express();
+
 const { Server } = require("socket.io");
 
-const server = http.createServer();
+const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: { origin: "*" }
 });
 
+// test route
+app.get("/", (req, res) => {
+  res.send("Backend is alive 🚀");
+});
+
+// your logic
 let users = {};
 let rooms = new Set();
 let roomUsers = {};
