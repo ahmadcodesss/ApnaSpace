@@ -65,3 +65,25 @@ Users can create named chat rooms and invite others to join. Once inside a room,
 
 3. Open `http://localhost:5173` in your browser
 
+## Screenshots
+
+### Username Entry Screen
+Users enter a username before joining the application.
+
+![Username Entry Screen](image1.png)
+
+### Room Selection / Lobby
+Create a new room or join an existing one.
+
+![Room Selection](image2.png)
+
+### Live Chat
+Real-time messaging between all connected users in a room.
+
+![Live Chat](image3.png)
+
+### Collaborative Whiteboard
+Shared canvas with synchronized drawing, erasing, and board clearing across all users.
+
+![Collaborative Whiteboard](image4.png)
+
