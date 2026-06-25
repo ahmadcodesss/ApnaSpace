@@ -65,7 +65,7 @@ Users can create named chat rooms and invite others to join. Once inside a room,
 
 3. Open `http://localhost:5173` in your browser
 
-## Screenshots
+## Application Preview
 
 ### Username Entry Screen
 Users enter a username before joining the application.
